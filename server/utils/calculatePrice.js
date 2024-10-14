@@ -24,16 +24,16 @@ export const calculatePrice = (distance, vehicleType) => {
     // Set per km rate based on vehicle type
     switch (vehicleType) {
         case 'bike':
-            perKmRate = 5;  
+            perKmRate = 0.5;  
             break;
         case 'car':
-            perKmRate = 10;  
+            perKmRate = 1;  
             break;
         case 'truck':
-            perKmRate = 20;  
+            perKmRate = 2;  
             break;
         default:
-            perKmRate = 10;  
+            perKmRate = 1;  
             break;
     }
 
