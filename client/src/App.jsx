@@ -8,12 +8,21 @@ import Booking from './components/Booking';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ToastContainer } from 'react-toastify';
 import Navbar from './components/Navbar';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 const App = () => {
   return (
     <Router>
       <div className=" min-w-full bg-gray-100">
-        <ToastContainer />
+      <ToastContainer
+          position="top-right" 
+          autoClose={2000} 
+          hideProgressBar={false} 
+          closeOnClick
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
