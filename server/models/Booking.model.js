@@ -44,6 +44,7 @@ const bookingSchema = new mongoose.Schema({
     timestamps: true,
 });
 
+// Indexes for optimally identifying nearby locations
 bookingSchema.index({ pickupLocation: '2dsphere' });
 bookingSchema.index({ dropoffLocation: '2dsphere' });
 

@@ -11,7 +11,7 @@ const formatDataToSend = async (user) => {
 };
 
 // @desc    Register a new user (customer or driver)
-// @route   POST /api/auth/register
+// @route   POST /auth/register
 export const signUp = async (req, res) => {
     const { name, email, password, role } = req.body;
 
@@ -66,7 +66,7 @@ export const signUp = async (req, res) => {
 
 
 // @desc    Login user (customer or driver)
-// @route   POST /api/auth/login
+// @route   POST /auth/login
 export const signIn = async (req, res) => {
     const { email, password } = req.body;
 

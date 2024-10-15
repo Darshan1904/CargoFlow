@@ -2,18 +2,26 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from '../axios';
 import debounce from 'lodash.debounce';
+import { toast } from 'react-toastify';
 
 const API_KEY = import.meta.env.VITE_ORS_API_KEY;
 
 const Booking = () => {
+  // pickup and dropoff location coordinates
   const [pickup, setPickup] = useState('');
   const [dropoff, setDropoff] = useState('');
+
   const [vehicleType, setVehicleType] = useState('car');
+
+  // suggestions states
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
+
+  // price estimate state
   const [priceEstimate, setPriceEstimate] = useState(null);
   const navigate = useNavigate();
 
+  // fetch location suggestions
   const fetchSuggestions = async (input, setSuggestions) => {
     if (input.length < 3) return;
     try {
@@ -28,10 +36,14 @@ const Booking = () => {
         coordinates: feature.geometry.coordinates
       })));
     } catch (error) {
+      toast.error(
+        'Error fetching suggestions. Please try again later.'
+      )
       console.error('Error fetching suggestions:', error);
     }
   };
 
+  // debounce fetchSuggestions
   const debouncedFetchSuggestions = useCallback(
     debounce((input, setSuggestions) => fetchSuggestions(input, setSuggestions), 1000),
     []
@@ -73,6 +85,7 @@ const Booking = () => {
       setPriceEstimate(response.data.estimatedPrice);
     } catch (error) {
       console.error('Error estimating price:', error);
+      toast.error('Error Estimating Price!!');
     }
   };
 
@@ -100,6 +113,7 @@ const Booking = () => {
       navigate('/customer-dashboard');
     } catch (error) {
       console.error('Error creating booking:', error);
+      toast.error('Error Creating Booking!!');
     }
   };
 

@@ -4,7 +4,7 @@ import { calculateDistance } from "../utils/calculateDistance.js";
 import { reverseGeocode } from "../utils/getPlace.js";
 
 // @desc  Calcuate Estimated price
-// @route GET /api/bookings/estimatePrice
+// @route POST /api/bookings/price
 export const estimatePrice = async (req, res) => {
     const { pickupLocation, dropoffLocation, vehicleType } = req.body;
 

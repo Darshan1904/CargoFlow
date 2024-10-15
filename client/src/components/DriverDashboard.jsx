@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
 import axios from '../axios';
+import io from 'socket.io-client';
+import { toast } from 'react-toastify';
 
 const DriverDashboard = () => {
   const [currentJob, setCurrentJob] = useState(null);
   const [availableJobs, setAvailableJobs] = useState([]);
   const [pastJobs, setPastJobs] = useState([]);
   const [location, setLocation] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_BACKEND_URL); 
+    setSocket(newSocket);
+
+    return () => newSocket.close();
+  }, []);
 
   useEffect(() => {
     fetchCurrentJob();
     fetchPastJobs();
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-      }
-    );
+    startLocationTracking();
   }, []);
 
   useEffect(() => {
@@ -29,6 +29,41 @@ const DriverDashboard = () => {
     }
   }, [location]);
 
+  // update location every 10 seconds
+  useEffect(() => {
+    if (socket && currentJob && currentJob.status === 'in_progress') {
+      const intervalId = setInterval(() => {
+        if (location) {
+          socket.emit('update-driver-location', {
+            bookingId: currentJob._id,
+            location: location
+          });
+        }
+      }, 10000); // Update every 10 seconds
+
+      return () => clearInterval(intervalId);
+    }
+  }, [socket, currentJob, location]);
+
+  const startLocationTracking = () => {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        toast.error(
+          'Error getting location. Please enable location tracking to view nearby jobs.'
+        )
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+    );
+  };
+
+  // Fetch data functions
   const fetchCurrentJob = async () => {
     try {
       const response = await axios.get('/api/bookings/current', {
@@ -41,6 +76,7 @@ const DriverDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching current job:', error);
+      toast.error('Error fetching current job. Please try again.');
     }
   };
 
@@ -56,6 +92,7 @@ const DriverDashboard = () => {
       setAvailableJobs(response.data);
     } catch (error) {
       console.error('Error fetching nearby jobs:', error);
+      toast.error('Error fetching nearby jobs. Please try again.');
     }
   };
 
@@ -69,9 +106,11 @@ const DriverDashboard = () => {
       setPastJobs(response.data);
     } catch (error) {
       console.error('Error fetching past jobs:', error);
+      toast.error('Error fetching past jobs. Please try again.');
     }
   };
 
+  // Update functions
   const acceptJob = async (job) => {
     try {
       await axios.put(`/api/bookings/${job._id}/accept`, {}, {
@@ -83,6 +122,7 @@ const DriverDashboard = () => {
       setAvailableJobs(availableJobs.filter((j) => j._id !== job._id));
     } catch (error) {
       console.error('Error accepting job:', error);
+      toast.error('Error accepting job. Please try again.');
     }
   };
 
@@ -104,9 +144,11 @@ const DriverDashboard = () => {
       }
     } catch (error) {
       console.error('Error updating job status:', error);
+      toast.error('Error updating job status. Please try again.');
     }
   };
 
+  
   const renderJobList = (jobs, title) => (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold mb-4">{title}</h2>

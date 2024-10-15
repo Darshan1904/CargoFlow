@@ -3,12 +3,10 @@ import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children, userType }) => {
   const isAuthenticated = () => {
-    // Implement your authentication check logic here
     return localStorage.getItem('userToken') !== null;
   };
 
   const getUserType = () => {
-    // Implement your user type check logic here
     return localStorage.getItem('userRole');
   };
 

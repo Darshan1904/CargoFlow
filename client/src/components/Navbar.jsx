@@ -39,7 +39,7 @@ const Navbar = () => {
                 {userType === 'customer' && (
                   <>
                     <NavLink to="/customer-dashboard">Dashboard</NavLink>
-                    <NavLink to="/booking">Book a Ride</NavLink>
+                    <NavLink to="/booking">Book a Vehicle</NavLink>
                   </>
                 )}
                 {userType === 'driver' && (

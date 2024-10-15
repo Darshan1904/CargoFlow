@@ -1,14 +1,27 @@
-import expresss from 'express';
+import express from 'express';
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import authRouter from './routes/auth.js';
 import bookingRouter from './routes/bookingRoutes.js';
+import setupSocket from './socket.js';
 
-const app = expresss();
+const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*", 
+    methods: ["GET", "POST"]
+  }
+});
+
+// setup socket
+setupSocket(io);
 
 app.use(cors());
-app.use(expresss.json({limit: "16kb"}));
-app.use(expresss.urlencoded({extended: true, limit: "16kb"}));
-app.use(expresss.static("public"));
+app.use(express.json({limit: "16kb"}));
+app.use(express.urlencoded({extended: true, limit: "16kb"}));
+app.use(express.static("public"));
 
 //auth routes
 app.use('/auth', authRouter);
@@ -16,4 +29,4 @@ app.use('/auth', authRouter);
 //booking routes
 app.use('/api/bookings', bookingRouter);
 
-export default app;
+export {app, httpServer};
