@@ -97,7 +97,7 @@ const Booking = () => {
       });
 
       console.log('Booking created:', response.data);
-      navigate('/user-dashboard');
+      navigate('/customer-dashboard');
     } catch (error) {
       console.error('Error creating booking:', error);
     }

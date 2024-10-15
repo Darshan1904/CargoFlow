@@ -74,7 +74,7 @@ const DriverDashboard = () => {
 
   const acceptJob = async (job) => {
     try {
-      await axios.put(`/api/bookings/${job._doc._id}/accept`, {}, {
+      await axios.put(`/api/bookings/${job._id}/accept`, {}, {
         headers: {
           'authorization': `Bearer ${localStorage.getItem('userToken')}`,
         },
@@ -172,14 +172,14 @@ const DriverDashboard = () => {
         {availableJobs.length ? <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <ul className="divide-y divide-gray-200">
             {availableJobs.map((job) => (
-              <li key={job._doc._id} className="px-6 py-4">
+              <li key={job._id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-900">
                       {`${job.pickupAddress} to ${job.dropoffAddress}`}
                     </p>
-                    <p className="text-sm text-gray-500">Vehicle: {job._doc.vehicleType}</p>
-                    <p className="text-sm text-gray-500">Earnings: ₹{job._doc.price.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500">Vehicle: {job.vehicleType}</p>
+                    <p className="text-sm text-gray-500">Earnings: ₹{job.price.toFixed(2)}</p>
                   </div>
                   <button
                     onClick={() => acceptJob(job)}

@@ -206,7 +206,7 @@ export const getNearbyBookings = async (req, res) => {
             const pickupAddress = await reverseGeocode(booking.pickupLocation.coordinates);
             const dropoffAddress = await reverseGeocode(booking.dropoffLocation.coordinates);
             return {
-                ...booking,
+                ...booking.toObject(),
                 pickupAddress,
                 dropoffAddress
             };
