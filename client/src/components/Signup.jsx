@@ -19,7 +19,7 @@ const Signup = () => {
       const { token } = response.data;
       localStorage.setItem('userToken', token);
       localStorage.setItem('userRole', role);
-      navigate(role === 'customer' ? '/user-dashboard' : '/driver-dashboard');
+      navigate(role === 'customer' ? '/cutomer-dashboard' : '/driver-dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred during signup');
       toast.error(err);

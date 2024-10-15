@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, userType }) => {
 
   const getUserType = () => {
     // Implement your user type check logic here
-    return localStorage.getItem('userType');
+    return localStorage.getItem('userRole');
   };
 
   if (!isAuthenticated()) {

@@ -17,7 +17,7 @@ const Login = () => {
       const { token, role } = response.data;
       localStorage.setItem('userToken', token);
       localStorage.setItem('userRole', role);
-      navigate(role === 'customer' ? '/user-dashboard' : '/driver-dashboard');
+      navigate(role === 'customer' ? '/customer-dashboard' : '/driver-dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred during login');
       toast.error(err);

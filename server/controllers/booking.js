@@ -1,6 +1,7 @@
 import Booking from "../models/Booking.model.js";
 import { calculatePrice } from "../utils/calculatePrice.js";
 import { calculateDistance } from "../utils/calculateDistance.js";
+import { reverseGeocode } from "../utils/getPlace.js";
 
 // @desc  Calcuate Estimated price
 // @route GET /api/bookings/estimatePrice
@@ -118,48 +119,171 @@ export const updateBookingStatus = async (req, res) => {
 // @route   GET /api/bookings/active
 // @access  Customer/Driver
 export const getActiveBookings = async (req, res) => {
-    const userId = req.user._id;
-    const role = req.user.role;
-
     try {
-        let query = {};
-        if (role === 'customer') {
-            query.customer = userId;
-            query.status = { $in: ['pending', 'in_progress'] };
-        } else if (role === 'driver') {
-            query.driver = userId;
-            query.status = { $in: ['accepted', 'in_progress'] };
-        }
+      const activeBookings = await Booking.find({
+        customer: req.user._id,
+        status: { $in: ['pending', 'accepted', 'in_progress'] }
+      }).sort('-createdAt');
 
-        const bookings = await Booking.find(query).populate('customer driver', 'name email');
-        res.status(200).json(bookings);
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
+      const bookingsWithAddresses = await Promise.all(activeBookings.map(async (booking) => {
+        const pickupAddress = await reverseGeocode(booking.pickupLocation.coordinates);
+        const dropoffAddress = await reverseGeocode(booking.dropoffLocation.coordinates);
+        return {
+          ...booking.toObject(),
+          pickupAddress,
+          dropoffAddress
+        };
+      }));
+  
+      res.json(bookingsWithAddresses);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
 };
+
+// @desc    Get past bookings for customer
+// @route   GET /api/bookings/past
+export const getPastBookings = async (req, res) => {
+    try {
+        let pastBookings;
+        if (req.user.role === 'customer') {
+            // Fetch completed bookings for the customer
+            pastBookings = await Booking.find({
+                customer: req.user._id,
+                status: 'completed'
+            }).sort('-completedAt');
+        } else if (req.user.role === 'driver') {
+            // Fetch completed jobs for the driver
+            pastBookings = await Booking.find({
+                driver: req.user._id,
+                status: 'completed'
+            }).sort('-completedAt');
+        } else {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+
+      const bookingsWithAddresses = await Promise.all(pastBookings.map(async (booking) => {
+        const pickupAddress = await reverseGeocode(booking.pickupLocation.coordinates);
+        const dropoffAddress = await reverseGeocode(booking.dropoffLocation.coordinates);
+        return {
+          ...booking.toObject(),
+          pickupAddress,
+          dropoffAddress
+        };
+      }));
+
+      res.json(bookingsWithAddresses);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  };
 
 // @desc    Get nearby bookings for driver
 // @route   GET /api/bookings/nearby
 export const getNearbyBookings = async (req, res) => {
-    const { lat, lng } = req.query;
-    const maxDistance = 10000; // 10 km radius
+    const { latitude, longitude } = req.query;
+    const maxDistance = 100000; // 100 km radius
   
+    // Validate lat and lng
+    const lat = parseFloat(latitude);
+    const lngt = parseFloat(longitude);
+
     try {
-      const nearbyBookings = await Booking.find({
-        pickupCoordinates: {
-          $near: {
-            $geometry: {
-              type: "Point",
-              coordinates: [parseFloat(lng), parseFloat(lat)]
+        const nearbyBookings = await Booking.find({
+            pickupLocation: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [lngt, lat]
+                    },
+                    $maxDistance: maxDistance
+                }
             },
-            $maxDistance: maxDistance
-          }
-        },
-        status: 'pending'
-      }).limit(10); // Limit to 10 nearby bookings
+            status: 'pending'
+        }).limit(10);
+
+        const bookingsWithAddresses = await Promise.all(nearbyBookings.map(async (booking) => {
+            const pickupAddress = await reverseGeocode(booking.pickupLocation.coordinates);
+            const dropoffAddress = await reverseGeocode(booking.dropoffLocation.coordinates);
+            return {
+                ...booking,
+                pickupAddress,
+                dropoffAddress
+            };
+        }));
   
-      res.status(200).json(nearbyBookings);
+        res.status(200).json(bookingsWithAddresses);
     } catch (err) {
-      res.status(500).json({ error: "Server error" });
+        console.error("Error in getNearbyBookings:", err);
+        res.status(500).json({ error: "Server error", message: err.message });
+    }
+};
+
+
+// @desc    Get current booking for driver
+// @route   GET /api/bookings/current
+export const getCurrentBooking = async (req, res) => {
+    try {
+      const currentBooking = await Booking.findOne({
+        driver: req.user._id,
+        status: { $in: ['accepted', 'in_progress'] }
+      });
+  
+      if (!currentBooking) {
+        return res.status(404).json({ message: "No current booking found" });
+      }
+  
+      const pickupAddress = await reverseGeocode(currentBooking.pickupLocation.coordinates);
+      const dropoffAddress = await reverseGeocode(currentBooking.dropoffLocation.coordinates);
+  
+      res.json({
+        ...currentBooking.toObject(),
+        pickupAddress,
+        dropoffAddress
+      });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+}
+
+// @desc    Accept a booking
+// @route   PUT /api/bookings/:id/accept
+// @access  Driver
+export const acceptBooking = async (req, res) => {
+    const role = req.user.role;
+    const driver = req.user._id;
+    const bookingId = req.params.id;
+
+    if (role !== 'driver') {
+        return res.status(403).json({ error: "Only driver accounts can accept bookings." });
+    }
+
+    try {
+        const booking = await Booking.findById(bookingId);
+
+        if (!booking) {
+            return res.status(404).json({ error: "Booking not found" });
+        }
+
+        if (booking.status !== 'pending') {
+            return res.status(400).json({ error: "This booking is no longer available" });
+        }
+
+        booking.driver = driver;
+        booking.status = 'accepted';
+
+        await booking.save();
+
+        const pickupAddress = await reverseGeocode(booking.pickupLocation.coordinates);
+        const dropoffAddress = await reverseGeocode(booking.dropoffLocation.coordinates);
+
+        res.status(200).json({
+            ...booking.toObject(),
+            pickupAddress,
+            dropoffAddress
+        });
+    } catch (err) {
+        console.error("Error in acceptBooking:", err);
+        res.status(500).json({ error: "Server error", message: err.message });
     }
 };
