@@ -51,7 +51,7 @@ const Navbar = () => {
           <div className="hidden md:block">
             <button
               onClick={handleLogout}
-              className="flex items-center text-gray-300 hover:bg-red-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200"
+              className="flex items-center text-black hover:bg-red-600 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200"
             >
               <LogOut className="mr-2" size={18} />
               Logout
@@ -75,7 +75,7 @@ const Navbar = () => {
             {userType === 'customer' && (
               <>
                 <NavLink to="/customer-dashboard">Dashboard</NavLink>
-                <NavLink to="/booking">Book a Ride</NavLink>
+                <NavLink to="/booking">Book a Vehicle</NavLink>
               </>
             )}
             {userType === 'driver' && (
