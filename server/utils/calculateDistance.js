@@ -8,8 +8,8 @@ export const calculateDistance = async (pickupLocation, dropoffLocation) => {
     try {
         const response = await axios.get(`https://api.openrouteservice.org/v2/directions/driving-car`, {
             params: {
-                start: `${pickupLocation.coordinates[0]},${pickupLocation.coordinates[1]}`,
-                end: `${dropoffLocation.coordinates[0]},${dropoffLocation.coordinates[1]}`,
+                start: `${pickupLocation[0]},${pickupLocation[1]}`,
+                end: `${dropoffLocation[0]},${dropoffLocation[1]}`,
             },
             headers: {
                 'Authorization': ORS_API_KEY,

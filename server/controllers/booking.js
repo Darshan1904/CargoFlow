@@ -50,14 +50,21 @@ export const createBooking = async (req, res) => {
         const booking = new Booking({
             customer,
             vehicleType,
-            pickupLocation,
-            dropoffLocation,
+            pickupLocation : {
+                type: "Point",
+                coordinates: pickupLocation,
+            },
+            dropoffLocation : {
+                type: "Point",
+                coordinates: dropoffLocation,
+            },
             price,
         });
 
         await booking.save();
         res.status(201).json(booking);
     } catch (err) {
+        console.log(err)
         res.status(500).json({ error: "Server error" });
     }
 };
@@ -128,5 +135,31 @@ export const getActiveBookings = async (req, res) => {
         res.status(200).json(bookings);
     } catch (err) {
         res.status(500).json({ error: "Server error" });
+    }
+};
+
+// @desc    Get nearby bookings for driver
+// @route   GET /api/bookings/nearby
+export const getNearbyBookings = async (req, res) => {
+    const { lat, lng } = req.query;
+    const maxDistance = 10000; // 10 km radius
+  
+    try {
+      const nearbyBookings = await Booking.find({
+        pickupCoordinates: {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: [parseFloat(lng), parseFloat(lat)]
+            },
+            $maxDistance: maxDistance
+          }
+        },
+        status: 'pending'
+      }).limit(10); // Limit to 10 nearby bookings
+  
+      res.status(200).json(nearbyBookings);
+    } catch (err) {
+      res.status(500).json({ error: "Server error" });
     }
 };
