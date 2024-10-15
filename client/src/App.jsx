@@ -7,6 +7,7 @@ import DriverDashboard from './components/DriverDashboard';
 import Booking from './components/Booking';
 import ProtectedRoute from './components/ProtectedRoute';
 import { ToastContainer } from 'react-toastify';
+import Navbar from './components/Navbar';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
             path="/customer-dashboard"
             element={
               <ProtectedRoute userType="customer">
+                <Navbar />
                 <UserDashboard />
               </ProtectedRoute>
             }
@@ -28,6 +30,7 @@ const App = () => {
             path="/driver-dashboard"
             element={
               <ProtectedRoute userType="driver">
+                <Navbar />
                 <DriverDashboard />
               </ProtectedRoute>
             }
@@ -36,6 +39,7 @@ const App = () => {
             path="/booking"
             element={
               <ProtectedRoute userType="customer">
+                <Navbar />
                 <Booking />
               </ProtectedRoute>
             }
