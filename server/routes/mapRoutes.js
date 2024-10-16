@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { getSuggestions } from '../controllers/mapController';
+import { getSuggestions } from '../controllers/mapController.js';
 
 const mapRoute = Router();
 
