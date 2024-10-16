@@ -5,7 +5,7 @@ import { Server } from 'socket.io';
 import authRouter from './routes/auth.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import setupSocket from './socket.js';
-import mapRoute from './routes/mapRoutes.js';
+import mapRouter from './routes/mapRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -20,8 +20,8 @@ const io = new Server(httpServer, {
 setupSocket(io);
 
 app.use(cors());
-app.use(express.json({limit: "16kb"}));
-app.use(express.urlencoded({extended: true, limit: "16kb"}));
+app.use(express.json({limit: "40kb"}));
+app.use(express.urlencoded({extended: true, limit: "40kb"}));
 app.use(express.static("public"));
 
 //auth routes
@@ -31,6 +31,6 @@ app.use('/auth', authRouter);
 app.use('/api/bookings', bookingRouter);
 
 //map routes
-app.use('/api/geocode', mapRoute);
+app.use('/api/geocode', mapRouter);
 
 export {app, httpServer};

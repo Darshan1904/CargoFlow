@@ -19,11 +19,9 @@ const Booking = () => {
   const [priceEstimate, setPriceEstimate] = useState(null);
   const navigate = useNavigate();
 
-  // fetch location suggestions
   const fetchSuggestions = async (input, setSuggestions) => {
     if (input.length < 3) return;
     try {
-      // Assuming you have set up a proxy endpoint on your server
       const response = await axios.get(`/api/geocode/autocomplete`, {
         params: {
           text: input,
