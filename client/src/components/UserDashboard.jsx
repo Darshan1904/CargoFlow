@@ -29,8 +29,8 @@ const UserDashboard = () => {
       socket.emit('join-booking-room', trackingBooking._id);
       socket.on('driver-location-updated', (location) => {
         setDriverLocation({
-          longitude: location.coordinates[0],
-          latitude: location.coordinates[1]
+          longitude: location.longitude,
+          latitude: location.latitude
         });
       });
 

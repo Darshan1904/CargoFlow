@@ -10,7 +10,7 @@ import Point from 'ol/geom/Point';
 import { LineString } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
-import { Style, Icon, Stroke } from 'ol/style';
+import { Style, Icon, Stroke, Text, Fill } from 'ol/style';
 import axios from '../axios';
 
 const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
@@ -21,7 +21,6 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
   const routeLayerRef = useRef(null);
   const [error, setError] = useState(null);
 
-  // Initialize the map and set up the initial state on component mount
   useEffect(() => {
     if (!mapInstanceRef.current) {
       const map = new Map({
@@ -41,37 +40,38 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
       mapInstanceRef.current = map;
     }
 
-    // If pickup and dropoff locations are provided, set up the map
     if (pickupLocation && dropoffLocation) {
       setupMap();
     }
   }, [pickupLocation, dropoffLocation]);
 
-  // Update driver's location 
   useEffect(() => {
     if (driverLocation && driverFeatureRef.current) {
-      const newPosition = fromLonLat([driverLocation.longitude, driverLocation.latitude]);
-      driverFeatureRef.current.getGeometry().setCoordinates(newPosition);
-
-      // Animate the map to center on the updated driver location and zoom in
-      mapInstanceRef.current.getView().animate({
-        center: newPosition,
-        duration: 500, 
-        zoom: 14,      
-      });
+      updateDriverLocation();
     }
   }, [driverLocation]);
 
-  // Set up the map with pickup, dropoff markers and route drawing
-  const setupMap = async () => {
+  const updateDriverLocation = () => {
+    const newPosition = fromLonLat([driverLocation.longitude, driverLocation.latitude]);
+    driverFeatureRef.current.getGeometry().setCoordinates(newPosition);
+
+    mapInstanceRef.current.getView().animate({
+      center: newPosition,
+      duration: 500,
+      zoom: 14,
+    });
+
+    fetchAndDisplayRoute();
+  };
+
+  const setupMap = () => {
     const map = mapInstanceRef.current;
 
-    // Remove any existing layers (markers or routes) before adding new ones
     if (markersLayerRef.current) map.removeLayer(markersLayerRef.current);
     if (routeLayerRef.current) map.removeLayer(routeLayerRef.current);
 
-    const pickupFeature = createMarkerFeature(pickupLocation, 'https://cdn-icons-png.flaticon.com/512/684/684908.png');
-    const dropoffFeature = createMarkerFeature(dropoffLocation, 'https://cdn-icons-png.flaticon.com/512/684/684908.png');
+    const pickupFeature = createMarkerFeature(pickupLocation, 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 'P');
+    const dropoffFeature = createMarkerFeature(dropoffLocation, 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 'D');
     
     driverFeatureRef.current = createMarkerFeature(driverLocation || pickupLocation, 'https://cdn-icons-png.flaticon.com/512/3097/3097144.png');
 
@@ -89,32 +89,20 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
     const extent = markersSource.getExtent();
     map.getView().fit(extent, { padding: [50, 50, 50, 50], duration: 1000 });
 
-    await fetchAndDisplayRoute(pickupLocation, dropoffLocation);
+    fetchAndDisplayRoute();
   };
 
-  // Fetch route and display it on the map
-  const fetchAndDisplayRoute = async (pickup, dropoff) => {
+  const fetchAndDisplayRoute = async () => {
     try {
-      console.log('Fetching route with params:', {
-        start: `${pickup.longitude},${pickup.latitude}`,
-        end: `${dropoff.longitude},${dropoff.latitude}`,
-      });
+      const [driverToPickup, pickupToDropoff] = await Promise.all([
+        fetchRoute(driverLocation || pickupLocation, pickupLocation),
+        fetchRoute(pickupLocation, dropoffLocation)
+      ]);
 
-      let response = await axios.get('/api/geocode/directions', {
-        params: {
-          start: `${pickup.longitude},${pickup.latitude}`,
-          end: `${dropoff.longitude},${dropoff.latitude}`,
-        },
-        headers: { Authorization: `Bearer ${localStorage.getItem('userToken')}` }
-      });
-      response = response.data;
-
-      if (!response.data || !response.data.features || response.data.features.length === 0) {
-        throw new Error('Invalid response from OpenRouteService API');
-      }
-
-      // Transform route coordinates for OpenLayers
-      const routeCoordinates = response.data.features[0].geometry.coordinates.map(coord => fromLonLat([coord[0], coord[1]]));
+      const routeCoordinates = [
+        ...driverToPickup,
+        ...pickupToDropoff.slice(1) // Remove first point to avoid duplication
+      ];
 
       const routeFeature = new Feature({
         geometry: new LineString(routeCoordinates),
@@ -131,6 +119,10 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
         features: [routeFeature],
       });
 
+      if (routeLayerRef.current) {
+        mapInstanceRef.current.removeLayer(routeLayerRef.current);
+      }
+
       const routeLayer = new VectorLayer({
         source: routeSource,
       });
@@ -138,7 +130,6 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
       mapInstanceRef.current.addLayer(routeLayer);
       routeLayerRef.current = routeLayer;
 
-      // Adjust map view to fit the route
       const routeExtent = routeSource.getExtent();
       mapInstanceRef.current.getView().fit(routeExtent, { padding: [50, 50, 50, 50], duration: 1000 });
 
@@ -149,8 +140,23 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
     }
   };
 
-  // Create marker features for pickup, dropoff, and driver locations
-  const createMarkerFeature = (location, iconUrl) => {
+  const fetchRoute = async (start, end) => {
+    const response = await axios.get('/api/geocode/directions', {
+      params: {
+        start: `${start.longitude},${start.latitude}`,
+        end: `${end.longitude},${end.latitude}`,
+      },
+      headers: { Authorization: `Bearer ${localStorage.getItem('userToken')}` }
+    });
+
+    if (!response.data.data || !response.data.data.features || response.data.data.features.length === 0) {
+      throw new Error('Invalid response from OpenRouteService API');
+    }
+
+    return response.data.data.features[0].geometry.coordinates.map(coord => fromLonLat(coord));
+  };
+
+  const createMarkerFeature = (location, iconUrl, label) => {
     const feature = new Feature({
       geometry: new Point(fromLonLat([location.longitude, location.latitude])),
     });
@@ -160,9 +166,22 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
         src: iconUrl,
         scale: 0.07,
       }),
+      text: new Text({
+        text: label,
+        offsetY: -25, 
+        font: 'bold 12px Arial',
+        fill: new Fill({
+          color: '#000', 
+        }),
+        stroke: new Stroke({
+          color: '#fff', 
+          width: 2,
+        }),
+      }),
     }));
     return feature;
   };
+  
 
   return (
     <div>
