@@ -76,7 +76,7 @@ const DriverDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching current job:', error);
-      toast.error('Error fetching current job. Please try again.');
+      // toast.error('Error fetching current job. Please try again.');
     }
   };
 
