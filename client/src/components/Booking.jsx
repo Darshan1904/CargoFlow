@@ -4,8 +4,6 @@ import axios from '../axios';
 import debounce from 'lodash.debounce';
 import { toast } from 'react-toastify';
 
-const API_KEY = import.meta.env.VITE_ORS_API_KEY;
-
 const Booking = () => {
   // pickup and dropoff location coordinates
   const [pickup, setPickup] = useState('');
@@ -25,9 +23,9 @@ const Booking = () => {
   const fetchSuggestions = async (input, setSuggestions) => {
     if (input.length < 3) return;
     try {
-      const response = await axios.get(`https://api.openrouteservice.org/geocode/autocomplete`, {
+      // Assuming you have set up a proxy endpoint on your server
+      const response = await axios.get(`/api/geocode/autocomplete`, {
         params: {
-          api_key: API_KEY,
           text: input,
         }
       });

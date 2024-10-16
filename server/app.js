@@ -5,6 +5,7 @@ import { Server } from 'socket.io';
 import authRouter from './routes/auth.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import setupSocket from './socket.js';
+import mapRoute from './routes/mapRoutes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,5 +29,8 @@ app.use('/auth', authRouter);
 
 //booking routes
 app.use('/api/bookings', bookingRouter);
+
+//map routes
+app.use('api/geocode', mapRoute);
 
 export {app, httpServer};
