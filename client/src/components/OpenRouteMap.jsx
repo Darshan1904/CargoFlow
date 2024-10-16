@@ -11,7 +11,7 @@ import { LineString } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon, Stroke, Fill } from 'ol/style';
-import axios from 'axios';
+import axios from '../axios';
 
 const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
   const mapRef = useRef();
@@ -86,20 +86,20 @@ const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
   };
 
   const fetchAndDisplayRoute = async (pickup, dropoff) => {
-    const API_KEY = import.meta.env.VITE_ORS_API_KEY;
-
+    
       console.log('Fetching route with params:', {
         start: `${pickup.longitude},${pickup.latitude}`,
         end: `${dropoff.longitude},${dropoff.latitude}`,
       });
 
-      const response = await axios.get('https://api.openrouteservice.org/v2/directions/driving-car', {
+      let response = await axios.get('/api/geocode/directions', {
         params: {
-          api_key: API_KEY,
           start: `${pickup.longitude},${pickup.latitude}`,
           end: `${dropoff.longitude},${dropoff.latitude}`,
         },
+        headers: { Authorization: `Bearer ${localStorage.getItem('userToken')}` }
       });
+      response = response.data;
 
       console.log('API Response:', response.data);
 
