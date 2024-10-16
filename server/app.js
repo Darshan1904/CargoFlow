@@ -31,6 +31,6 @@ app.use('/auth', authRouter);
 app.use('/api/bookings', bookingRouter);
 
 //map routes
-app.use('api/geocode', mapRoute);
+app.use('/api/geocode', mapRoute);
 
 export {app, httpServer};
