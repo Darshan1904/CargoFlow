@@ -39,7 +39,7 @@ const DriverDashboard = () => {
             location: location
           });
         }
-      }, 10000); // Update every 10 seconds
+      }, 10000);
 
       return () => clearInterval(intervalId);
     }

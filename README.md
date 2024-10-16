@@ -82,6 +82,33 @@ ShipEase uses OpenRouteService APIs for various functionalities:
 - **GeoCodeAutoComplete**: Provides place suggestions based on user input
 - **GeoCodeReverse**: Identifies places from latitude and longitude coordinates
 
+## Finding Nearby Bookings for driver
+
+For nearby job fetching for drivers, I have optimized the database with the following indexes on the Booking schema:
+
+```javascript
+// Indexes for optimally identifying nearby locations
+bookingSchema.index({ pickupLocation: '2dsphere' });
+bookingSchema.index({ dropoffLocation: '2dsphere' });
+```
+
+I use the following query to fetch nearby bookings:
+
+```javascript
+const nearbyBookings = await Booking.find({
+    pickupLocation: {
+        $near: {
+            $geometry: {
+                type: "Point",
+                coordinates: [lngt, lat]
+            },
+            $maxDistance: maxDistance
+        }
+    },
+    status: 'pending'
+}).limit(10);
+```
+
 ## Surge Pricing Algorithm
 
 The application implements a basic surge pricing model:
