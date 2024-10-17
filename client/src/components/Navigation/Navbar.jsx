@@ -14,6 +14,7 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  // NavLink component
   const NavLink = ({ to, children }) => {
     const isActive = location.pathname === to;
     return (

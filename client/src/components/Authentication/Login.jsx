@@ -15,6 +15,7 @@ const Login = () => {
     setError('');
     setIsLoading(true);
     try {
+      // Authentication call
       const response = await axios.post('/auth/login', { email, password });
       const { token, role } = response.data;
       localStorage.setItem('userToken', token);
@@ -98,7 +99,7 @@ const Login = () => {
         </form>
         <div className="text-center">
           <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Don't have an account? Sign up
+            Do not have an account? Sign up
           </Link>
         </div>
       </div>

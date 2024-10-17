@@ -17,6 +17,7 @@ const Signup = () => {
     setError('');
     setIsLoading(true);
     try {
+      // Register User
       const response = await axios.post('http://localhost:5000/auth/register', { name, email, password, role });
       const { token } = response.data;
       localStorage.setItem('userToken', token);

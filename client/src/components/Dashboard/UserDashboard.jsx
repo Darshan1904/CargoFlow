@@ -63,11 +63,14 @@ const UserDashboard = () => {
     }
   };
 
+  // Track driver handler
   const handleTrackDriver = (booking) => {
     setTrackingBooking(booking);
     setDriverLocation(null); // Reset driver location when switching to a new booking
   };
+  //
 
+  // Render Booking function
   const renderBookingList = (bookings, title) => (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold mb-4">{title}</h2>
@@ -100,6 +103,7 @@ const UserDashboard = () => {
       </div>
     </div>
   );
+  //
 
   return (
     <div className="bg-gray-100 min-h-screen">

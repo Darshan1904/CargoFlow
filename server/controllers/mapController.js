@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 import axios from 'axios';
 
+// @desc    Get suggestions for places
+// @route   GET /api/geocode/autocomplete
 export const getSuggestions = async(req, res) => {
     try {
         const response = await axios.get('https://api.openrouteservice.org/geocode/autocomplete', {
@@ -16,6 +18,8 @@ export const getSuggestions = async(req, res) => {
       }
 }
 
+// @desc    Get directions/route between two places
+// @route   GET /api/geocode/directions
 export const getDirections = async (req, res) => {
   
   const start = req.query.start.replace(/['"`]/g, ''); 

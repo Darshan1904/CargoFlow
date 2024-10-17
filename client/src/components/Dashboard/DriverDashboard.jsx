@@ -109,6 +109,7 @@ const DriverDashboard = () => {
       toast.error('Error fetching past jobs. Please try again.');
     }
   };
+  // 
 
   // Update functions
   const acceptJob = async (job) => {
@@ -147,8 +148,9 @@ const DriverDashboard = () => {
       toast.error('Error updating job status. Please try again.');
     }
   };
+  //
 
-  
+  // Render Job list function
   const renderJobList = (jobs, title) => (
     <div className="mb-8">
       <h2 className="text-2xl font-semibold mb-4">{title}</h2>
@@ -177,6 +179,7 @@ const DriverDashboard = () => {
       </div>
     </div>
   );
+  //
 
   return (
     <div className="bg-gray-100 min-h-screen">

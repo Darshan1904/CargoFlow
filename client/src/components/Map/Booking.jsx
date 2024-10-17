@@ -15,6 +15,14 @@ const Booking = () => {
   const [isBooking, setIsBooking] = useState(false);
   const navigate = useNavigate();
 
+  /**
+   * Fetches location suggestions based on the input text.
+   *
+   * @param {string} input - The input text to get suggestions for. Must be at least 3 characters long.
+   * @param {function} setSuggestions - The function to update the suggestions state.
+   * @returns {Promise<void>} - A promise that resolves when the suggestions are fetched and state is updated.
+   * @throws Will display an error toast and log the error to the console if the fetch fails.
+  **/
   const fetchSuggestions = async (input, setSuggestions) => {
     if (input.length < 3) return;
     try {
@@ -31,11 +39,13 @@ const Booking = () => {
     }
   };
 
+  // Debounce fetchSuggestions to reduce API calls.
   const debouncedFetchSuggestions = useCallback(
     debounce((input, setSuggestions) => fetchSuggestions(input, setSuggestions), 300),
     []
   );
 
+  // Location change handler
   const handleLocationChange = (e, setLocation, setSuggestions) => {
     setLocation({ name: e.target.value, coordinates: null });
     debouncedFetchSuggestions(e.target.value, setSuggestions);
@@ -46,6 +56,13 @@ const Booking = () => {
     setSuggestions([]);
   };
 
+
+  /**
+   * Estimates the price for a booking based on the provided pickup and dropoff locations and vehicle type.
+   * 
+   * This function sets the loading state, clears any previous price estimate, and makes an API call to 
+   * retrieve the estimated price. If the pickup or dropoff locations are not valid, it shows an error toast.
+  **/
   const estimatePrice = async () => {
     setIsEstimating(true);
     setPriceEstimate(null);
