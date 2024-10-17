@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from '../axios';
+import axios from '../../axios';
 import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -118,7 +118,7 @@ const DriverDashboard = () => {
           'authorization': `Bearer ${localStorage.getItem('userToken')}`,
         },
       });
-      setCurrentJob(job);
+      fetchCurrentJob();
       setAvailableJobs(availableJobs.filter((j) => j._id !== job._id));
     } catch (error) {
       console.error('Error accepting job:', error);
@@ -179,68 +179,71 @@ const DriverDashboard = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Driver Dashboard</h1>
-      {currentJob ? (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Current Job</h2>
-          <p>Pickup: {currentJob.pickupAddress}</p>
-          <p>Dropoff: {currentJob.dropoffAddress}</p>
-          <p>Vehicle Type: {currentJob.vehicleType}</p>
-          <p>Earnings: ₹{currentJob.price.toFixed(2)}</p>
-          <p>Status: {currentJob.status}</p>
-          {currentJob.status === 'accepted' && (
-            <button
-              onClick={() => updateJobStatus('in_progress')}
-              className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-            >
-              Start Job
-            </button>
-          )}
-          {currentJob.status === 'in_progress' && (
-            <button
-              onClick={() => updateJobStatus('completed')}
-              className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Complete Job
-            </button>
+    <div className="bg-gray-100 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-8 text-gray-800">Driver Dashboard</h1>
+        {currentJob ? (
+          <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-700">Current Job</h2>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <p className="text-sm"><span className="font-medium">Pickup:</span> {currentJob.pickupAddress}</p>
+              <p className="text-sm"><span className="font-medium">Dropoff:</span> {currentJob.dropoffAddress}</p>
+              <p className="text-sm"><span className="font-medium">Vehicle Type:</span> {currentJob.vehicleType}</p>
+              <p className="text-sm"><span className="font-medium">Earnings:</span> ₹{currentJob.price.toFixed(2)}</p>
+            </div>
+            <p className="text-sm mb-4"><span className="font-medium">Status:</span> <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">{currentJob.status}</span></p>
+            {currentJob.status === 'accepted' && (
+              <button
+                onClick={() => updateJobStatus('in_progress')}
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                Start Job
+              </button>
+            )}
+            {currentJob.status === 'in_progress' && (
+              <button
+                onClick={() => updateJobStatus('completed')}
+                className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+              >
+                Complete Job
+              </button>
+            )}
+          </div>
+        ) : (
+          <p className="mb-8 text-lg text-gray-600">No current job. Accept a job from the list below.</p>
+        )}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Available Jobs Nearby</h2>
+          {availableJobs.length ? (
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <ul className="divide-y divide-gray-200">
+                {availableJobs.map((job) => (
+                  <li key={job._id} className="p-4 hover:bg-gray-50 transition duration-150 ease-in-out">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {`${job.pickupAddress} to ${job.dropoffAddress}`}
+                        </p>
+                        <p className="text-sm text-gray-500">Vehicle: {job.vehicleType}</p>
+                        <p className="text-sm text-gray-500">Earnings: ₹{job.price.toFixed(2)}</p>
+                      </div>
+                      <button
+                        onClick={() => acceptJob(job)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                      >
+                        Accept
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-lg text-gray-600">No available jobs nearby.</p>
           )}
         </div>
-      ) : (
-        <p className="mb-6">No current job. Accept a job from the list below.</p>
-      )}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-4">Available Jobs Nearby</h2>
-        {availableJobs.length ? <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <ul className="divide-y divide-gray-200">
-            {availableJobs.map((job) => (
-              <li key={job._id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {`${job.pickupAddress} to ${job.dropoffAddress}`}
-                    </p>
-                    <p className="text-sm text-gray-500">Vehicle: {job.vehicleType}</p>
-                    <p className="text-sm text-gray-500">Earnings: ₹{job.price.toFixed(2)}</p>
-                  </div>
-                  <button
-                    onClick={() => acceptJob(job)}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Accept
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        :
-
-        <p>No available jobs nearby.</p>
-      }
+        {renderJobList(pastJobs, "Past Jobs")}
       </div>
-      {renderJobList(pastJobs, "Past Jobs")}
     </div>
   );
 };

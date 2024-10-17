@@ -72,12 +72,13 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden bg-gray-800 shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {userType === 'customer' && (
+            <div className="mb-5">{userType === 'customer' && (
               <>
                 <NavLink to="/customer-dashboard">Dashboard</NavLink>
                 <NavLink to="/booking">Book a Vehicle</NavLink>
               </>
             )}
+            </div>
             {userType === 'driver' && (
               <NavLink to="/driver-dashboard">Dashboard</NavLink>
             )}

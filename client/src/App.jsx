@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import UserDashboard from './components/UserDashboard';
-import DriverDashboard from './components/DriverDashboard';
+import Login from './components/Authentication/Login';
+import Signup from './components/Authentication/Signup';
+import UserDashboard from './components/Dashboard/UserDashboard';
+import DriverDashboard from './components/Dashboard/DriverDashboard';
 import Booking from './components/Map/Booking';
 import ProtectedRoute from './components/Authentication/ProtectedRoute';
 import { ToastContainer } from 'react-toastify';

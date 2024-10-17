@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from '../axios';
+import axios from '../../axios';
 import io from 'socket.io-client';
-import OpenRouteMap from './OpenRouteMap';
+import OpenRouteMap from '../Map/OpenRouteMap';
 
 const UserDashboard = () => {
   const [activeBookings, setActiveBookings] = useState([]);
@@ -102,11 +102,12 @@ const UserDashboard = () => {
   );
 
   return (
+    <div className="bg-gray-100 min-h-screen">
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">User Dashboard</h1>
+      <h1 className="text-4xl font-bold mb-8 text-gray-800">User Dashboard</h1>
       <Link
         to="/booking"
-        className="mb-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        className="mb-8 inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
       >
         Book a Vehicle
       </Link>
@@ -115,26 +116,31 @@ const UserDashboard = () => {
       {renderBookingList(pastBookings, "Past Bookings")}
 
       {trackingBooking && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            Tracking Driver for Booking: 
-          </h2>
-          <p>From: {trackingBooking.pickupAddress}</p>
-          <p>To: {trackingBooking.dropoffAddress}</p>
-          <OpenRouteMap
-            driverLocation={driverLocation}
-            pickupLocation={{
-              latitude: trackingBooking.pickupLocation.coordinates[1],
-              longitude: trackingBooking.pickupLocation.coordinates[0]
-            }}
-            dropoffLocation={{
-              latitude: trackingBooking.dropoffLocation.coordinates[1],
-              longitude: trackingBooking.dropoffLocation.coordinates[0]
-            }}
-          />
+        <div className="mb-8 bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-700">
+              Tracking Driver for Booking
+            </h2>
+            <p className="text-sm text-gray-600 mb-2"><span className="font-medium">From:</span> {trackingBooking.pickupAddress}</p>
+            <p className="text-sm text-gray-600 mb-4"><span className="font-medium">To:</span> {trackingBooking.dropoffAddress}</p>
+          </div>
+          <div className="h-96">
+            <OpenRouteMap
+              driverLocation={driverLocation}
+              pickupLocation={{
+                latitude: trackingBooking.pickupLocation.coordinates[1],
+                longitude: trackingBooking.pickupLocation.coordinates[0]
+              }}
+              dropoffLocation={{
+                latitude: trackingBooking.dropoffLocation.coordinates[1],
+                longitude: trackingBooking.dropoffLocation.coordinates[0]
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
+  </div>
   );
 };
 
