@@ -20,8 +20,6 @@ const Booking = () => {
    *
    * @param {string} input - The input text to get suggestions for. Must be at least 3 characters long.
    * @param {function} setSuggestions - The function to update the suggestions state.
-   * @returns {Promise<void>} - A promise that resolves when the suggestions are fetched and state is updated.
-   * @throws Will display an error toast and log the error to the console if the fetch fails.
   **/
   const fetchSuggestions = async (input, setSuggestions) => {
     if (input.length < 3) return;
