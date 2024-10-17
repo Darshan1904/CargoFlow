@@ -4,10 +4,10 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import UserDashboard from './components/UserDashboard';
 import DriverDashboard from './components/DriverDashboard';
-import Booking from './components/Booking';
-import ProtectedRoute from './components/ProtectedRoute';
+import Booking from './components/Map/Booking';
+import ProtectedRoute from './components/Authentication/ProtectedRoute';
 import { ToastContainer } from 'react-toastify';
-import Navbar from './components/Navbar';
+import Navbar from './components/Navigation/Navbar';
 import 'react-toastify/dist/ReactToastify.css'; 
 
 const App = () => {

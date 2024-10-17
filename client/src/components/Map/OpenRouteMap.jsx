@@ -11,7 +11,7 @@ import { LineString } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
 import { Style, Icon, Stroke, Text, Fill } from 'ol/style';
-import axios from '../axios';
+import axios from '../../axios';
 
 const OpenRouteMap = ({ driverLocation, pickupLocation, dropoffLocation }) => {
   const mapRef = useRef();
