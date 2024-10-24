@@ -182,7 +182,7 @@ export const getPastBookings = async (req, res) => {
 // @route   GET /api/bookings/nearby
 export const getNearbyBookings = async (req, res) => {
     const { latitude, longitude } = req.query;
-    const maxDistance = 100000; // 100 km radius
+    const maxDistance = 150000; // 150 km radius
   
     // Validate lat and lng
     const lat = parseFloat(latitude);
